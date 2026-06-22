@@ -1,7 +1,7 @@
 export interface User {
   id: string;
-  email: string;
   username: string;
+  email: string;
   passwordHash: string;
   isEmailVerified: boolean;
   isBanned: boolean;
@@ -12,15 +12,15 @@ export interface User {
 }
 
 export interface UserCreate {
-  email: string;
   username: string;
+  email: string;
   passwordHash: string;
-  isEmailVerified?: boolean;
 }
 
 export interface UserUpdate {
-  username: string;
-  passwordHash: string;
-  isEmailVerified: boolean;
-  isBanned: boolean;
+  username?: string;
+  email?: string;
+  passwordHash?: string;
+  isEmailVerified?: boolean;
+  isBanned?: boolean;
 }

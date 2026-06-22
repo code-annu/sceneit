@@ -1,33 +1,33 @@
+import TYPES from "@/di/inversify.types";
 import { inject, injectable } from "inversify";
-import TYPES from "../../di/inversify.types";
-import { User } from "./entities/user.entity";
-
+import UserRepository from "./repository/user.repository";
+import { User } from "./entity/user.entity";
+import { CreateUserDto } from "./dto/create-user.dto";
 import bcrypt from "bcrypt";
-import UserRepository from "./repositories/user.repository";
-import { CreateUserDto } from "./dtos/user-create.dto";
 import {
   AuthenticateByEmailDto,
   AuthenticateByUsernameDto,
-} from "./dtos/user-authenticate.dto";
+} from "./dto/authenticate.dto";
+import ConflictError from "@/shared/error/errors/ConflictError";
 import { UserErrorCode } from "./user.error";
-import ConflictError from "../error/errors/ConflictError";
-import NotFoundError from "../error/errors/NotFoundError";
-import UnAuthorizedError from "../error/errors/UnAuthorizedError";
+import NotFoundError from "@/shared/error/errors/NotFoundError";
+import UnAuthorizedError from "@/shared/error/errors/UnAuthorizedError";
+import UserGuard from "./user.guard";
 
 @injectable()
 export default class UserService {
   constructor(
-    @inject(TYPES.UserRepository)
-    private userRepo: UserRepository,
+    @inject(TYPES.UserRepository) private readonly userRepo: UserRepository,
+    @inject(TYPES.UserGuard) private readonly userGuard: UserGuard,
   ) {}
 
   async createNewUser(input: CreateUserDto): Promise<User> {
-    const { username, password, email } = input;
+    const { username, email, password } = input;
 
     const existingUserByEmail = await this.userRepo.findByEmail(email);
     if (existingUserByEmail) {
       throw new ConflictError(
-        `User with email ${email} already exists`,
+        `User with ${existingUserByEmail.email} already exists`,
         UserErrorCode.EMAIL_ALREADY_EXISTS,
       );
     }
@@ -35,68 +35,65 @@ export default class UserService {
     const existingUserByUsername = await this.userRepo.findByUsername(username);
     if (existingUserByUsername) {
       throw new ConflictError(
-        `User with username ${username} already exists`,
+        `User with ${existingUserByUsername.username} already exists`,
         UserErrorCode.USERNAME_ALREADY_EXISTS,
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.userRepo.create({
       username,
+      email,
       passwordHash: hashedPassword,
-      email: email,
     });
     return user;
   }
 
-  async authenticateUserByUsername(
+  async authenticateByUsername(
     input: AuthenticateByUsernameDto,
   ): Promise<User> {
     const { username, password } = input;
     const user = await this.userRepo.findByUsername(username);
     if (!user) {
       throw new NotFoundError(
-        `User not found with username ${username}`,
+        `User with ${username} not found`,
         UserErrorCode.USERNAME_NOT_FOUND,
       );
     }
-
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnAuthorizedError(
-        "Invalid credentials",
+        `Invalid username or password`,
         UserErrorCode.INVALID_CREDENTIALS,
       );
     }
 
-    this.ensureUserIsActive(user);
+    this.userGuard.ensureUserIsActive(user);
     return user;
   }
 
-  async authenticateUserByEmail(input: AuthenticateByEmailDto): Promise<User> {
+  async authenticateByEmail(input: AuthenticateByEmailDto) {
     const { email, password } = input;
     const user = await this.userRepo.findByEmail(email);
     if (!user) {
       throw new NotFoundError(
-        `User not found with email ${email}`,
+        `User with ${email} not found`,
         UserErrorCode.EMAIL_NOT_FOUND,
       );
     }
-
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnAuthorizedError(
-        "Invalid credentials",
+        `Invalid email or password`,
         UserErrorCode.INVALID_CREDENTIALS,
       );
     }
 
-    this.ensureUserIsActive(user);
+    this.userGuard.ensureUserIsActive(user);
     return user;
   }
 
-  async softDeleteUser(id: string): Promise<User> {
+  async deleteUserSoftly(id: string): Promise<User> {
     const user = await this.userRepo.findById(id);
     if (!user) {
       throw new NotFoundError(
@@ -105,13 +102,13 @@ export default class UserService {
       );
     }
 
-    this.ensureUserIsActive(user);
+    this.userGuard.ensureUserIsActive(user);
 
     const deletedUser = await this.userRepo.softDelete(id);
     return deletedUser;
   }
 
-  async permanentDeleteUser(id: string): Promise<User> {
+  async deleteUserPermanently(id: string): Promise<User> {
     const user = await this.userRepo.findById(id);
     if (!user) {
       throw new NotFoundError(
@@ -120,19 +117,9 @@ export default class UserService {
       );
     }
 
+    this.userGuard.ensureUserIsNotBanned(user);
+
     const deletedUser = await this.userRepo.permanentDelete(id);
     return deletedUser;
-  }
-
-  private ensureUserIsActive(user: User) {
-    if (user.isDeleted) {
-      throw new UnAuthorizedError(
-        "User is deleted",
-        UserErrorCode.USER_DELETED,
-      );
-    }
-    if (user.isBanned) {
-      throw new UnAuthorizedError("User is banned", UserErrorCode.USER_BANNED);
-    }
   }
 }
