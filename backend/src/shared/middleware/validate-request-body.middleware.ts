@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodObject, ZodError } from "zod";
 import ErrorCode from "../error/ErrorCode";
-import { BadRequestError, InternalServerError } from "../error/errors";
+import BadRequestError from "../error/errors/BadRequestError";
+import InternalServerError from "../error/errors/InternalServerError";
 
 export const validateRequestBody =
   (schema: ZodObject<any>) =>

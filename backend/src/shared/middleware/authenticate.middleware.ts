@@ -1,52 +1,37 @@
 // import { NextFunction, Request, Response } from "express";
+// import JWTUtil, { JWTPayload } from "../util/jwt.util";
+// import UnAuthorizedError from "../error/errors/UnAuthorizedError";
+// import AuthErrorCode from "@/modules/auth/auth.error";
 
 // export interface AuthRequest extends Request {
 //   auth?: JWTPayload;
 // }
 
-// export default async function authenticateUser(
+// const jwtUtil = new JWTUtil();
+
+// export default function authenticateUser(
 //   req: AuthRequest,
 //   res: Response,
 //   next: NextFunction,
 // ) {
 //   const authHeader = req.headers.authorization;
 //   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-//     throw new MissingTokenError("Authorization token is required");
+//     throw new UnAuthorizedError(
+//       "Authorization token is required",
+//       AuthErrorCode.MISSING_TOKEN,
+//     );
 //   }
 
 //   const token = authHeader.substring("Bearer ".length).trim();
 
 //   try {
-//     const payload = await verifyAccessToken(token);
+//     const payload = jwtUtil.verifyAccessToken(token);
 //     req.auth = payload;
 //     next();
 //   } catch (error) {
-//     throw new InvalidTokenError("Invalid or expired token");
+//     throw new UnAuthorizedError(
+//       "Invalid or expired token",
+//       AuthErrorCode.INVALID_TOKEN,
+//     );
 //   }
 // }
-
-/*export const validateApiKey = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  const apiKey = req.header("x-api-key");
-  if (!apiKey) {
-    throw new UnauthorizedError(
-      "Api key is required to preform this action",
-      ErrorTypes.MISSING_API_KEY,
-    );
-  }
-
-  const user = await userRepo.findByApiKey(apiKey);
-  if (!user) {
-    throw new NotFoundError("Api key not found");
-  }
-
-  req.auth = {
-    userId: user.id,
-    email: user.email,
-  };
-
-  next();
-};*/
