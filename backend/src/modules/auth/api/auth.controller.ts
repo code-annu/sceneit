@@ -8,6 +8,7 @@ import ClientInfoUtil from "@/shared/util/client-info.util";
 import { buildAuthResponse } from "./auth.response";
 import { EmailLoginDTO, UsernameLoginDTO } from "../dto/login-dto";
 import { RefreshTokenDTO } from "../dto/refresh-token.dto";
+import { AuthRequest } from "@/shared/middleware/authenticate.middleware";
 
 @injectable()
 export default class AuthController {
@@ -62,5 +63,15 @@ export default class AuthController {
     },
   );
 
-  
+  postLogout = catchAsync(
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+      const { sid, sub } = req.auth!;
+      await this.authService.logout({ sessionId: sid, userId: sub });
+      res.status(200).json({
+        success: true,
+        message: "User logged out successfully",
+        data: null,
+      });
+    },
+  );
 }
