@@ -54,14 +54,7 @@ export default class UserService {
   ): Promise<User> {
     const { username, password } = input;
     const user = await this.userRepo.findByUsername(username);
-    if (!user) {
-      throw new NotFoundError(
-        `User with ${username} not found`,
-        UserErrorCode.USERNAME_NOT_FOUND,
-      );
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       throw new UnAuthorizedError(
         `Invalid username or password`,
         UserErrorCode.INVALID_CREDENTIALS,
@@ -75,14 +68,7 @@ export default class UserService {
   async authenticateByEmail(input: AuthenticateByEmailDto) {
     const { email, password } = input;
     const user = await this.userRepo.findByEmail(email);
-    if (!user) {
-      throw new NotFoundError(
-        `User with ${email} not found`,
-        UserErrorCode.EMAIL_NOT_FOUND,
-      );
-    }
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isPasswordValid) {
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       throw new UnAuthorizedError(
         `Invalid email or password`,
         UserErrorCode.INVALID_CREDENTIALS,

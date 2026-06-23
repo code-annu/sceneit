@@ -1,14 +1,14 @@
 export interface User {
-  id: string;
-  username: string;
-  email: string;
-  passwordHash: string;
-  isEmailVerified: boolean;
-  isBanned: boolean;
-  isDeleted: boolean;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  readonly id: string;
+  readonly username: string;
+  readonly email: string;
+  readonly passwordHash: string;
+  readonly isEmailVerified: boolean;
+  readonly isBanned: boolean;
+  readonly isDeleted: boolean;
+  readonly deletedAt: Date | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
 }
 
 export interface UserCreate {
