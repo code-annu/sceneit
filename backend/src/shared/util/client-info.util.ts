@@ -3,10 +3,10 @@ import { injectable } from "inversify";
 import { UAParser } from "ua-parser-js";
 
 export interface ClientInfoType {
-  deviceName?: string | undefined;
-  deviceType?: string | undefined;
-  ipAddress: string;
-  userAgent?: string | undefined;
+  deviceName: string | null;
+  deviceType: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
 }
 
 @injectable()
@@ -17,10 +17,10 @@ export default class ClientInfoUtil {
     const result = parser.getResult();
 
     return {
-      ipAddress: req.ip ?? "",
-      userAgent: result.ua,
-      deviceType: result.device.type,
-      deviceName: result.device.vendor,
+      ipAddress: req.ip ?? null,
+      userAgent: result.ua ?? null,
+      deviceType: result.device.type ?? null,
+      deviceName: result.device.vendor ?? null,
     };
   }
 }

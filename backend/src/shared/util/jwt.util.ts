@@ -2,7 +2,8 @@ import jwt from "jsonwebtoken";
 import { StringValue } from "ms";
 import { injectable } from "inversify";
 import crypto from "crypto";
-import ENV from "../../config/env";
+import { addDays } from "date-fns";
+import ENV from "@/config/env";
 
 export interface JWTPayload {
   sub: string;
@@ -12,7 +13,7 @@ export interface JWTPayload {
 @injectable()
 export default class JWTUtil {
   private readonly ACCESS_TOKEN_SECRET = ENV.JWT_ACCESS_SECRET;
-  private readonly ACCESS_TOKEN_EXPIRE = (ENV.JWT_ACCESS_EXPIRES_IN ||
+  private readonly ACCESS_TOKEN_EXPIRE = (ENV.JWT_ACCESS_EXPIRES_IN ??
     "1m") as StringValue;
 
   generateAccessToken = (payload: JWTPayload): string => {
@@ -33,4 +34,8 @@ export default class JWTUtil {
   verifyAccessToken = (token: string): JWTPayload => {
     return jwt.verify(token, this.ACCESS_TOKEN_SECRET) as JWTPayload;
   };
+
+  getRefreshTokenExpiry(): Date {
+    return addDays(new Date(), ENV.JWT_REFRESH_EXPIRES_IN);
+  }
 }
