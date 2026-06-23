@@ -1,28 +1,25 @@
 import { NextFunction, Request, Response } from "express";
-import { ZodObject, ZodError } from "zod";
-import ErrorCode from "../error/ErrorCode";
+import { ZodObject } from "zod";
 import BadRequestError from "../error/errors/BadRequestError";
-import InternalServerError from "../error/errors/InternalServerError";
+import ErrorCode from "../error/ErrorCode";
 
 export const validateRequestBody =
   (schema: ZodObject<any>) =>
   (req: Request, _res: Response, next: NextFunction) => {
-    try {
-      schema.parse(req.body);
-      next();
-    } catch (error) {
-      if (error instanceof ZodError) {
-        throw new BadRequestError(
-          "Missing or invalid request body",
-          ErrorCode.INVALID_REQUEST_BODY,
-          error.issues.map((issue) => ({
-            message: issue.message,
-            field: issue.path,
-          })),
-        );
-      }
-      const message =
-        error instanceof Error ? error.message : "Invalid request body data";
-      throw new InternalServerError(message, ErrorCode.INTERNAL_SERVER);
+    const result = schema.safeParse(req.body);
+
+    if (!result.success) {
+      throw new BadRequestError(
+        "Missing or invalid request body",
+        ErrorCode.INVALID_REQUEST_BODY,
+        result.error.issues.map((issue) => ({
+          message: issue.message,
+          field: issue.path,
+        })),
+      );
     }
+
+    req.body = result.data;
+
+    next();
   };
