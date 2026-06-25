@@ -28,7 +28,7 @@ describe("Refresh token", () => {
   const userData = {
     email: "peter@gmail.com",
     username: "peter",
-    password: "Peter@gmail.com",
+    password: "Peter@1234",
   };
 
   let authUser: AuthUser;

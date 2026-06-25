@@ -1,5 +1,4 @@
 import app from "@/app";
-import { prisma } from "@/config/prisma.client";
 import { SignupDTO } from "@/modules/auth/dto/signup-dto";
 import { UserErrorCode } from "@/shared/user/user.error";
 import { ClientInfoType } from "@/shared/util/client-info.util";
