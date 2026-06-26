@@ -14,6 +14,8 @@ import AuthErrorCode from "./auth.error";
 import UserGuard from "@/shared/user/user.guard";
 import { LogoutDto } from "./dto/logout.dto";
 import NotFoundError from "@/shared/error/errors/NotFoundError";
+import ForbiddenError from "@/shared/error/errors/ForbiddenError";
+import { UserErrorCode } from "@/shared/user/user.error";
 
 @injectable()
 export default class AuthService {
@@ -56,7 +58,7 @@ export default class AuthService {
       );
     }
 
-    if (session.revokedAt) {
+    if (session.isRevoked) {
       throw new UnAuthorizedError(
         "Refresh token has been revoked",
         AuthErrorCode.REFRESH_TOKEN_REVOKED,
@@ -70,7 +72,20 @@ export default class AuthService {
       );
     }
 
-    this.userGuard.ensureUserIsActive(session.user);
+    if (session.user.isDeleted) {
+      await this.sessionRepo.revoke(session.id);
+      throw new UnAuthorizedError(
+        "Invalid user credentials",
+        UserErrorCode.INVALID_CREDENTIALS,
+      );
+    }
+    if (session.user.isBanned) {
+      throw new ForbiddenError(
+        "User account has been banned",
+        UserErrorCode.BANNED_USER,
+      );
+    }
+
     const refreshToken = this.jwtUtil.generateRefreshToken();
     const updatedSession = await this.sessionRepo.update(session.id, {
       refreshTokenHash: this.jwtUtil.hashToken(refreshToken),
@@ -88,7 +103,7 @@ export default class AuthService {
   }
 
   async logout(input: LogoutDto): Promise<void> {
-    const { sessionId, userId } = input;
+    const { sessionId } = input;
     const session = await this.sessionRepo.findById(sessionId);
 
     if (!session) {
@@ -98,14 +113,7 @@ export default class AuthService {
       );
     }
 
-    if (session.user.id !== userId) {
-      throw new UnAuthorizedError(
-        "You are not authorized to perform this action",
-        AuthErrorCode.SESSION_ACCESS_DENIED,
-      );
-    }
-
-    await this.sessionRepo.delete(sessionId);
+    await this.sessionRepo.revoke(sessionId);
   }
 
   private async createSession(
