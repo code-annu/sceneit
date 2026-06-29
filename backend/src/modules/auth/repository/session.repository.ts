@@ -31,14 +31,20 @@ export default class SessionRepository {
     return session ? this.sessionMapper.toEntity(session) : null;
   }
 
-  async findByRefreshTokenHash(
-    refreshTokenHash: string,
-  ): Promise<Session | null> {
+  async findByTokenHash(tokenHash: string): Promise<Session | null> {
     const session = await this.db.session.findUnique({
-      where: { refreshTokenHash },
+      where: { refreshTokenHash: tokenHash },
       include: { user: true },
     });
     return session ? this.sessionMapper.toEntity(session) : null;
+  }
+
+  async findByUserId(userId: string): Promise<Session[]> {
+    const sessions = await this.db.session.findMany({
+      where: { userId },
+      include: { user: true },
+    });
+    return sessions.map(this.sessionMapper.toEntity);
   }
 
   async update(id: string, data: Prisma.SessionUpdateInput): Promise<Session> {
@@ -50,16 +56,8 @@ export default class SessionRepository {
     return this.sessionMapper.toEntity(session);
   }
 
-  async findByUserId(userId: string): Promise<Session[]> {
-    const sessions = await this.db.session.findMany({
-      where: { userId },
-      include: { user: true },
-    });
-    return sessions.map(this.sessionMapper.toEntity);
-  }
-
   async revoke(id: string): Promise<void> {
-    await this.db.session.update({
+    await this.db.session.updateMany({
       where: { id },
       data: { revokedAt: new Date() },
     });
