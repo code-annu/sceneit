@@ -83,9 +83,8 @@ export default class AuthService {
   }
 
   async refreshSession(input: RefreshTokenDto): Promise<Session> {
-    const session = await this.sessionRepo.findByTokenHash(
-      this.jwtUtil.hashToken(input.token),
-    );
+    const tokenHash = this.jwtUtil.hashToken(input.token);
+    const session = await this.sessionRepo.findByTokenHash(tokenHash);
     if (!session) {
       throw new UnauthorizedError(
         "Refresh token is invalid",
@@ -155,6 +154,7 @@ export default class AuthService {
 
     session.accessToken = accessToken;
     session.refreshToken = refreshToken;
+
     return session;
   }
 }
