@@ -3,21 +3,21 @@ import z from "zod";
 export const usernameLoginSchema = z.object({
   username: z
     .string("Username is required")
-    .nonempty("Username cannot be empty")
-    .trim(),
+    .trim()
+    .nonempty("Username cannot be empty"),
   password: z
     .string("Password is required")
-    .nonempty("Password cannot be empty")
-    .trim(),
+    .trim()
+    .nonempty("Password cannot be empty"),
 });
 
 export const emailLoginSchema = z.object({
   email: z
     .email("Email is missing or invalid")
-    .nonempty("Email is required")
-    .trim(),
+    .trim()
+    .nonempty("Email cannot be empty"),
   password: z
     .string("Password is required")
-    .nonempty("Password cannot be empty")
-    .trim(),
+    .trim()
+    .nonempty("Password cannot be empty"),
 });
