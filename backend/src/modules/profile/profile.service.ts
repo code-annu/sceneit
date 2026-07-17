@@ -32,17 +32,6 @@ export default class ProfileService {
     return this.profileRepo.create(userId, data);
   }
 
-  async getProfileById(userId: string): Promise<Profile> {
-    const profile = await this.profileRepo.findById(userId);
-    if (!profile || profile.user.deletedAt || profile.user.isBanned) {
-      throw new NotFoundError(
-        "Profile not found",
-        ProfileErrorCode.PROFILE_NOT_FOUND,
-      );
-    }
-    return profile;
-  }
-
   async updateProfile(input: ProfileUpdateDto): Promise<Profile> {
     const { id, ...updates } = input;
 

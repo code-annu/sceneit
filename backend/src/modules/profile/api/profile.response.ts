@@ -28,6 +28,7 @@ export function buildProfileResponse(profile: Profile, message: string) {
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
       user: {
+        id: user.id,
         username,
         email,
         isEmailVerified,
