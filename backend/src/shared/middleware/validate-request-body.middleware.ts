@@ -11,7 +11,7 @@ export const validateRequestBody =
     if (!result.success) {
       throw new BadRequestError(
         "Missing or invalid request body",
-        ErrorCode.INVALID_REQUEST_BODY,
+        ErrorCode.INVALID_REQUEST,
         result.error.issues.map((issue) => ({
           message: issue.message,
           field: issue.path,

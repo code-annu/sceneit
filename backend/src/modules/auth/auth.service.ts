@@ -57,7 +57,8 @@ export default class AuthService {
     if (
       !user ||
       !(await this.userService.verifyPassword(password, user.passwordHash)) ||
-      user.deletedAt
+      user.deletedAt ||
+      user.isBanned
     ) {
       throw new UnauthorizedError(
         "Invalid username or password",

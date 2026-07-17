@@ -4,9 +4,9 @@ import AuthController from "./auth.controller";
 import { Router } from "express";
 import { validateRequestBody } from "@/shared/middleware/validate-request-body.middleware";
 import authenticateUser from "@/shared/middleware/authenticate.middleware";
-import signupSchema from "../schemas/signup.schema";
-import { emailLoginSchema, usernameLoginSchema } from "../schemas/login.schema";
-import { refreshTokenSchema } from "../schemas/refresh-token.schema";
+import signupSchema from "../schema/signup.schema";
+import { emailLoginSchema, usernameLoginSchema } from "../schema/login.schema";
+import { refreshTokenSchema } from "../schema/refresh-token.schema";
 
 @injectable()
 export default class AuthRouter {

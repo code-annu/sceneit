@@ -8,6 +8,10 @@ import SessionRepository from "@/modules/auth/repository/session.repository";
 import AuthController from "@/modules/auth/api/auth.controller";
 import AuthRouter from "@/modules/auth/api/auth.router";
 import AuthService from "@/modules/auth/auth.service";
+import ProfileController from "@/modules/profile/api/profile.controller";
+import ProfileRouter from "@/modules/profile/api/profile.router";
+import ProfileService from "@/modules/profile/profile.service";
+import ProfileRepository from "@/modules/profile/repository/profile.repository";
 
 const container = new Container();
 
@@ -29,3 +33,15 @@ container
 container.bind(TYPES.AuthService).to(AuthService).inSingletonScope();
 container.bind(TYPES.AuthController).to(AuthController).inSingletonScope();
 container.bind(TYPES.AuthRouter).to(AuthRouter).inSingletonScope();
+
+// Profile binding
+container
+  .bind(TYPES.ProfileRepository)
+  .to(ProfileRepository)
+  .inSingletonScope();
+container.bind(TYPES.ProfileService).to(ProfileService).inSingletonScope();
+container
+  .bind(TYPES.ProfileController)
+  .to(ProfileController)
+  .inSingletonScope();
+container.bind(TYPES.ProfileRouter).to(ProfileRouter).inSingletonScope();

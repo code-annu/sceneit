@@ -12,6 +12,12 @@ const TYPES = {
   AuthService: Symbol.for("AuthService"),
   AuthController: Symbol.for("AuthController"),
   AuthRouter: Symbol.for("AuthRouter"),
+
+  // Profile types
+  ProfileRepository: Symbol.for("ProfileRepository"),
+  ProfileService: Symbol.for("ProfileService"),
+  ProfileController: Symbol.for("ProfileController"),
+  ProfileRouter: Symbol.for("ProfileRouter"),
 };
 
 export default TYPES;

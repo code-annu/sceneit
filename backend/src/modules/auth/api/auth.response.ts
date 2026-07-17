@@ -20,7 +20,7 @@ export function buildAuthResponse(session: Session, message: string) {
         email,
         isEmailVerified,
         isBanned,
-        joinedAt: createdAt,
+        createdAt,
       },
     },
   };

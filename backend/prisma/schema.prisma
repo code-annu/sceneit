@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  username        String    @unique
+  passwordHash    String    @map("password_hash")
+  isEmailVerified Boolean   @default(false) @map("is_email_verified")
+  isBanned        Boolean   @default(false) @map("is_banned")
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  profile  Profile?
+  sessions Session[]
+
+  @@index([email, username])
+  @@map("users")
+}
+
+model Session {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @map("user_id") @db.Uuid
+  refreshTokenHash String   @unique @map("refresh_token_hash")
+  expiresAt        DateTime @map("expires_at") @db.Timestamptz(3)
+  lastUsedAt       DateTime @default(now()) @map("last_used_at") @db.Timestamptz(3)
+
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+
+  deviceName String? @map("device_name")
+  deviceType String? @map("device_type")
+  ipAddress  String? @map("ip_address")
+  userAgent  String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, refreshTokenHash])
+  @@map("sessions")
+}
+
+model Profile {
+  id              String  @id @db.Uuid
+  fullname        String
+  bio             String?
+  avatarUrl       String? @map("avatar_url")
+  bannerUrl       String? @map("banner_url")
+  followersCount  Int     @default(0) @map("followers_count")
+  followingsCount Int     @default(0) @map("followings_count")
+  postsCount      Int     @default(0) @map("posts_count")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@index([fullname])
+  @@map("profiles")
+}
