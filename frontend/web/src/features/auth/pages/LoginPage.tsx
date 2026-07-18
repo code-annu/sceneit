@@ -15,9 +15,13 @@ import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 import UsernameLoginForm from "../components/UsernameLoginForm";
 import EmailLoginForm from "../components/EmailLoginForm";
 import AppRoutes from "@/router/app.routes";
+import { useUsernameLogin, useEmailLogin } from "../hooks/useLogin";
 
 export const LoginPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
+  const { mutate: usernameLogin, isPending: isUsernamePending } =
+    useUsernameLogin();
+  const { mutate: emailLogin, isPending: isEmailPending } = useEmailLogin();
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -30,7 +34,8 @@ export const LoginPage: React.FC = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "radial-gradient(circle at 50% 50%, #151d35 0%, #090d1a 100%)",
+        background:
+          "radial-gradient(circle at 50% 50%, #151d35 0%, #090d1a 100%)",
         py: 4,
       }}
     >
@@ -58,10 +63,20 @@ export const LoginPage: React.FC = () => {
 
           <Card sx={{ width: "100%", overflow: "visible" }}>
             <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-              <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 700 }}>
+              <Typography
+                variant="h5"
+                align="center"
+                gutterBottom
+                sx={{ fontWeight: 700 }}
+              >
                 Welcome Back
               </Typography>
-              <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 4 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                align="center"
+                sx={{ mb: 4 }}
+              >
                 Track your favorite movies, read reviews, and build lists.
               </Typography>
 
@@ -90,9 +105,15 @@ export const LoginPage: React.FC = () => {
               {/* Dynamic Form Render */}
               <Box>
                 {activeTab === 0 ? (
-                  <UsernameLoginForm />
+                  <UsernameLoginForm
+                    onSubmit={usernameLogin}
+                    isPending={isUsernamePending}
+                  />
                 ) : (
-                  <EmailLoginForm />
+                  <EmailLoginForm
+                    onSubmit={emailLogin}
+                    isPending={isEmailPending}
+                  />
                 )}
               </Box>
             </CardContent>

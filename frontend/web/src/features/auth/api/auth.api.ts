@@ -31,4 +31,9 @@ export default abstract class AuthApi {
     );
     return response.data;
   }
+
+  static async refreshToken(): Promise<AuthUser> {
+    const response = await AxiosRequest.post<AuthResponse>("/auth/refresh");
+    return response.data;
+  }
 }
